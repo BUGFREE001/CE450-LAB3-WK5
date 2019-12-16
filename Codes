@@ -1,0 +1,463 @@
+
+
+#1
+
+
+#include <REG52.H>
+#define uint unsigned int 
+#define uchar unsigned char
+#include <intrins.h> 
+
+sbit SW1=P2^4;
+sbit LED1=P2^5; 
+void delay(uint c){
+uint a,b;
+for(a=c; a>0; a--) 
+for(b=415; b>0; b--);
+}
+
+void rotate(){
+        delay(170);
+        P1 = _cror_(P1,1); 
+}
+void main (void){
+        uchar pressNum=0;
+        P1 = 0x7F;
+        while (1){
+                if(SW1==0){
+                        delay(20);
+                        if(SW1==0){
+                                while(!SW1); 
+                                if(pressNum==0) rotate();
+                                if(pressNum==1) rotate(); 
+                                pressNum++;
+                                if(pressNum==2) pressNum=0; 
+                        }
+                }
+        }     
+}
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+
+
+#2
+
+Please note that:
+
+---------------------------------------------
+
+Keypad connects to P2.0-P2.7
+7-S LED connects to P1.0-P1.7
+Bit control connects to P3.3
+
+---------------------------------------------
+
+#include <REG52.H> 
+#include <intrins.h>
+#define uint unsigned int
+#define uchar unsigned char
+sbit buzz=P3^2;
+sbit SegLEDB1=P3^3;
+void delay(uint c){
+uint a,b;
+for(a=c; a>0; a--)
+for(b=415; b>0; b--);
+}
+
+void sevenSegmentNum(uchar num){
+switch(num){
+ case 0:{
+P1=0xC0;
+break;
+}
+ case 1:{
+P1=0xF9;
+break;
+}
+ case 2: {
+P1=0xA4;
+break;
+}
+ case 3:{
+P1=0xB0;
+break;
+}
+case 4:{
+P1=0x99;
+break;
+}
+case 5:{
+P1=0x92;
+break;
+}
+case 6:{
+P1=0x82;
+break;
+}
+case 7:{
+P1=0xF8;
+break;
+}
+case 8:{
+P1=0x80;
+break;
+}
+case 9:{
+P1=0x98;
+break;
+}
+}
+}
+void sevenSegmentChar(uchar alph){
+switch(alph){
+case 'a':{
+P1=0xA0;
+break;
+}
+case 'b':{
+P1=0x83;
+break;
+}
+case 'c':{
+P1=0xA7;
+break;
+}
+case 'd':{
+P1=0xA1;
+break;
+}
+case 'e':{
+P1=0x86;
+break;
+}
+case 'f':{
+P1=0x8E;
+break;
+}
+case 'g':{
+P1=0x90;
+break;
+}
+case 'h':{
+P1=0x8B;
+break;
+}
+case 'i':{
+P1=0xFB;
+break;
+}
+case 'j':{
+P1=0xF1;
+break;
+}
+case 'k':{
+P1=0x8F;
+break;
+}
+case 'l':{
+P1=0xC7;
+break;
+}
+case 'm':{
+P1=0xAA;
+break;
+}
+case 'n':{
+P1=0xAB;
+break;
+}
+case 'o':{
+P1=0xA3;
+break;
+}
+case 'p':{
+P1=0x8C;
+break;
+}
+case 'q':{
+P1=0x9A;
+break;
+}
+case 'r':{
+P1=0xAF;
+break;
+}
+case 's':{
+P1=0x92;
+break;
+}
+case 't':{
+P1=0x87;
+break;
+}
+case 'u':{
+P1=0xE3;
+break;
+}
+case 'v':{
+P1=0xC1;
+break;
+}
+case 'w':{
+P1=0x81;
+break;
+}
+case 'x':{
+P1=0xB9;
+break;
+}
+case 'y':{
+P1=0x8D;
+break;
+}
+case 'z':{
+P1=0xB3;
+break;
+}
+}
+}
+
+
+
+void main(){
+        uchar temp; 
+        SegLEDB1=0;
+        buzz=0; 
+        while(1){
+        P2=0xFE; 
+        temp=P2; 
+        temp=temp&0xF0;
+        if(temp==0x70){
+                delay(20);
+                temp=P2;
+                temp=temp&0xF0;
+                if(temp==0x70){
+                        while((P2&0xF0)==0x70);
+                        buzz=1;
+                        SegLEDB1=0;
+                        sevenSegmentNum(1); 
+                        delay(5);
+                buzz=0;
+                }
+        }
+        if(temp==0xB0) {
+                delay(20);
+                temp=P2;
+                temp=temp&0xF0;
+                if(temp==0xB0){
+                        while((P2&0xF0)==0xB0); 
+                        buzz=1;
+                        sevenSegmentNum(5);
+                        delay(5);
+                        buzz=0;
+                }
+        }
+        if(temp==0xD0) {
+                delay(20);
+                temp=P2; 
+                temp=temp&0xF0;
+                if(temp==0xD0){
+                        while((P2&0xF0)==0xD0);
+                        buzz=1;
+                        sevenSegmentNum(9);
+                        delay(5);
+                        buzz=0;
+                }
+        }
+        if(temp==0xE0){
+                delay(20);
+                temp=P2; 
+                temp=temp&0xF0;
+                if(temp==0xE0){
+                        sevenSegmentChar('c');
+                        P2=0xFD;
+                        temp=P2; 
+                        temp=temp&0xF0;
+                        while(temp==0x70){
+                                delay(20);
+                                temp=P2; 
+                                temp=temp&0xF0;
+                                if(temp==0x70){
+                                        sevenSegmentChar('t');
+                                }
+                        }
+                        if((P2&0xF0)==0x60){
+                                while((P2&0xF0)==0x60);
+                                sevenSegmentChar('t');
+                        }
+                        else if((P2&0xF0)==0xE0){
+                                while((P2&0xF0)==0xE0); 
+                                buzz=1;
+                                sevenSegmentChar('c'); 
+                                delay(5);
+                                buzz=0;
+                        }
+                }
+        }
+       
+        P2=0xFD; 
+        temp=P2; 
+        temp=temp&0xF0; 
+        if(temp==0x70){
+        delay(20); 
+        temp=P2; 
+        temp=temp&0xF0;
+        if(temp==0x70){
+        while((P2&0xF0)==0x70);
+        buzz=1;
+        SegLEDB1=0;
+        sevenSegmentNum(2);
+        delay(5);
+        buzz=0;
+        }
+        }
+        if(temp==0xB0){
+        delay(20); 
+        temp=P2; 
+        temp=temp&0xF0;
+        if(temp==0xB0){
+        while((P2&0xF0)==0xB0); 
+        buzz=1;
+        sevenSegmentNum(6); 
+        delay(5);
+        buzz=0;
+        }
+        }
+        if(temp==0xD0) {
+        delay(20);
+        temp=P2; 
+        temp=temp&0xF0;
+        if(temp==0xD0){
+        while((P2&0xF0)==0xD0);
+        buzz=1;
+        sevenSegmentNum(0); 
+        delay(5);
+        buzz=0;
+        }
+        }
+        if(temp==0xE0){
+        delay(20);
+        temp=P2;
+        temp=temp&0xF0;
+        if(temp==0xE0){
+        while((P2&0xF0)==0xE0);
+        buzz=1;
+        sevenSegmentChar('d');
+        delay(5);
+        buzz=0;
+        }
+        }
+     
+     
+        P2=0xFB; 
+        temp=P2;
+        temp=temp&0xF0; 
+        if(temp==0x70){
+        delay(20); 
+        temp=P2; 
+        temp=temp&0xF0;
+        if(temp==0x70){
+        while((P2&0xF0)==0x70);
+        buzz=1;
+        SegLEDB1=0;
+        sevenSegmentNum(3);
+        delay(5);
+        buzz=0;
+        }
+        }
+        if(temp==0xB0){
+        delay(20);
+        temp=P2;
+        temp=temp&0xF0;
+        if(temp==0xB0){
+        while((P2&0xF0)==0xB0);
+        buzz=1;
+        sevenSegmentNum(7);
+        delay(5);
+        buzz=0;
+        }
+        }
+        if(temp==0xD0){
+        delay(20);
+        temp=P2;
+        temp=temp&0xF0;
+        if(temp==0xD0){
+        while((P2&0xF0)==0xD0);
+        buzz=1;
+        sevenSegmentChar('a'); 
+        delay(5);
+        buzz=0;
+        }
+        }
+        if(temp==0xE0){
+        delay(20);
+        temp=P2;
+        temp=temp&0xF0;
+        if(temp==0xE0){
+        while((P2&0xF0)==0xE0);
+        buzz=1;
+        sevenSegmentChar('e');
+        delay(5);
+        buzz=0;
+        }
+        }
+       
+       
+        P2=0xF7; 
+        temp=P2;
+        temp=temp&0xF0;
+        if(temp==0x70){
+        delay(20); 
+        temp=P2;
+        temp=temp&0xF0;
+        if(temp==0x70){
+        while((P2&0xF0)==0x70);
+        buzz=1;
+        SegLEDB1=0;
+        sevenSegmentNum(4);
+        delay(5);
+        buzz=0;
+        }
+        }
+        if(temp==0xB0){
+        delay(20);
+        temp=P2;
+        temp=temp&0xF0;
+        if(temp==0xB0){
+        while((P2&0xF0)==0xB0);
+        buzz=1;
+        sevenSegmentNum(8);
+        delay(5);
+        buzz=0;
+        }
+        }
+        if(temp==0xD0) 
+        {
+        delay(20);
+        temp=P2;
+        temp=temp&0xF0;
+        if(temp==0xD0){
+        while((P2&0xF0)==0xD0);
+        buzz=1;
+        sevenSegmentChar('b');
+        delay(5);
+        buzz=0;
+        }
+        }
+                if(temp==0xE0){
+                        delay(20);
+                        temp=P2
+                        temp=temp&0xF0;
+                        if(temp==0xE0){
+                                while((P2&0xF0)==0xE0);
+                                buzz=1;
+                                sevenSegmentChar('f');
+                                delay(5);
+                                buzz=0;
+                        }
+                }
+        }
+}
